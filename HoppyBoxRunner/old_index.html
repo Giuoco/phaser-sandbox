@@ -1,0 +1,290 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>HoppyBoxRunner</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+
+
+<script type="text/javascript">
+
+/* Tutorial Root: http://phaser.io/tutorials/making-your-first-phaser-game/part3 */
+
+/*global Phaser*/
+var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var platforms; //group
+var background;
+var nearground;
+var player;
+var playerhurt;
+var stones; //group
+var butflys;//group
+
+var scoreDisplay = "";
+var score = 0;
+
+var highScoreDisplay = "";
+var highScore = 0;
+
+var instructions
+
+
+function preload() {
+    //load up resources
+    game.load.image('sky', 'assets/sunnysky.png');
+    game.load.image('pines', 'assets/tallpinebackground.png');
+    game.load.image('brush', 'assets/forebackground.png');
+    game.load.image('ground', 'assets/platform.png');
+    game.load.spritesheet('butfly', 'assets/Butterfly50X50X4.png',50,50,4);
+    game.load.image('hoppy', 'assets/hoppy.png');
+    game.load.image('hurthoppy', 'assets/hurthoppy.png');
+    
+    //each frame is 60 wide and 50 tall (60X50)
+    game.load.spritesheet('stone', 'assets/rollingstone.png',60,53,3);
+}
+
+
+function create() {
+    
+    this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+
+    
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+
+    //  A simple background for our game
+    game.add.sprite(0, 0, 'sky');
+    background = game.add.tileSprite(0, 0, 800, 600, 'pines');
+    nearground = game.add.tileSprite(0, 0, 800, 600, 'brush');
+
+
+    //  The platforms group contains the ground and the 2 ledges we can jump on
+    platforms = game.add.group();
+
+    //  We will enable physics for any object that is created in this group
+    platforms.enableBody = true;
+
+    // Here we create the ground.
+    var ground = platforms.create(0, game.world.height - 64, 'ground');
+    
+    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
+    ground.scale.setTo(2, 2);
+
+    //  This stops it from falling away when you jump on it
+    ground.body.immovable = true;
+    
+    // add hoppy!
+    addHoppy();
+    
+    
+    //controls
+    game.input.onTap.add(onTap, this);
+     
+     
+    //stones
+    stones = game.add.group();
+     //  We will enable physics for any stone that is created in this group
+    stones.enableBody = true;
+    
+    butflys = game.add.group();
+    butflys.enableBody = true;
+    
+    //create a timer for endless adding of stones
+    game.time.events.loop(Phaser.Timer.SECOND, timerTick, this);
+    
+    highScoreDisplay = game.add.text(16, 16, 'High Score: 0', { fontSize: '32px', fill: '#000' });
+    scoreDisplay = game.add.text(16, 40, 'Score: 0', { fontSize: '32px', fill: '#000' });
+    instructions = game.add.text(250,60, 'Hoppy Box Runner!  Tap to jump!', {fontSize: '24px', fill: '#000'});
+}
+
+
+function update() {
+    //move the parallax
+    background.tilePosition.x += -1;
+    nearground.tilePosition.x += -2;
+    
+    //  Collide the player and the butflys with the platforms
+    game.physics.arcade.collide(player, platforms);
+    game.physics.arcade.collide(stones, platforms);
+   
+    //  Checks to see if the player overlaps with any of the butflys, if he does call the collectbutfly function
+    game.physics.arcade.overlap(player, stones, hurtPlayer, null, this);
+    
+      //  Checks to see if the player overlaps with any of the butflys, if he does call the collectbutfly function
+    game.physics.arcade.overlap(player, butflys, collectButflys, null, this);
+
+    // if the stone is falling off the screen then destroy it.
+    stones.forEach(
+        function(stone)
+        {
+            if(stone.x < 0)
+            {
+                stone.destroy();
+                if(player!=null)
+                {
+                    score+=1;
+                    scoreDisplay.text = 'Score: ' + score;
+    
+                    if(score > highScore)
+                    {
+                        highScore = score;
+                        highScoreDisplay.text = 'High Score: ' + highScore;
+                    }
+                }
+            }
+        }, this
+    );    
+
+    //check to see if player hurt needs destroyed
+    if(playerhurt)
+    {
+        if(playerhurt.y > 900)   
+        {
+            playerhurt.destroy();
+            playerhurt=null;
+            
+            addHoppy();
+        }
+    }
+}
+
+var doubleJumpBool = false;
+
+function onTap(thisPlayer, doubleTap) 
+{
+    //check to make sure hoppy isn't hurt
+    if(player!=null)
+    {
+        //check to see if hoppy is on the ground
+        if(player.body.touching.down)
+        {
+            doubleJumpBool = true;
+            player.body.velocity.y = -350;
+            
+        }
+        
+        if(!player.body.touching.down && doubleJumpBool)
+        {
+            player.body.velocity.y += -200;
+            doubleJumpBool = false;
+        }
+    }
+}
+
+function hurtPlayer() {
+    playerhurt = game.add.sprite(player.x,player.y, 'hurthoppy');
+    
+    player.destroy();
+    player=null;
+    //  We need to enable physics on the player
+    game.physics.arcade.enable(playerhurt);
+    
+    //  Player physics properties. Give the little guy a slight bounce.
+    playerhurt.body.bounce.y = 0.0;
+    playerhurt.body.gravity.y = 300;
+    
+    playerhurt.body.velocity.y = -350;
+    playerhurt.body.velocity.x = 10;
+    
+    score = 0;
+    scoreDisplay.text = 'Score: ' + score;
+}
+
+function addHoppy()
+{
+     //add player
+        // The player and its settings
+    if(!player)
+    {
+        player = game.add.sprite(100, game.world.height - 150, 'hoppy');
+    
+        //  We need to enable physics on the player
+        game.physics.arcade.enable(player);
+    
+        //  Player physics properties. Give the little guy a slight bounce.
+        player.body.bounce.y = 0.0;
+        player.body.gravity.y = 600;
+        player.body.collideWorldBounds = true;
+    }
+}
+
+function addStone()
+{
+    var stone = stones.create(750,game.world.height-150,'stone');
+    stone.animations.add('roll');
+    stone.animations.play('roll',10,true);
+    stone.body.gravity.y=400;
+    stone.body.bounce.y=0.6;
+    stone.body.gravity.x= game.rnd.integerInRange(-50, -600);
+}
+
+function addButfly()
+{
+    var butfly = butflys.create(750,game.world.height-200,'butfly');
+    butfly.animations.add('spin');
+    butfly.animations.play('spin',10,true);
+
+    butfly.body.gravity.x= game.rnd.integerInRange(-50, -600);
+}
+
+function collectButflys(player, butfly)
+{
+    butfly.kill();
+    
+    score += 3;
+    scoreDisplay.text = 'Score: ' + score;
+    
+    if(score > highScore)
+    {
+        highScore = score;
+        highScoreDisplay.text = 'High Score: ' + highScore;
+    }
+    
+   
+    
+}
+ 
+var stonecounter = 0;
+var butflycounter = 0;
+
+function timerTick()
+{
+    //one second passed
+    stonecounter++;
+    butflycounter++;
+    
+    if (stonecounter>4)
+    {
+        addStone();
+        stonecounter=0;
+    }
+    
+    if(butflycounter>3)
+    {
+        addButfly();
+        butflycounter = 0;
+    }
+    
+     if(score > 3)
+    {
+        instructions.visible=false;
+    } else
+    {
+        instructions.visible=true;
+    }
+    
+}
+
+</script>
+
+<div id="gameDiv"></div>
+
+</body>
+</html>
