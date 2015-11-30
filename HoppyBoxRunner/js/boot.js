@@ -13,6 +13,8 @@ var bootState = {
         //setup physics and scaling
         game.physics.startSystem(Phaser.Physics.ARCADE);
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+        game.scale.maxHeight = gameHeight;
+        game.scale.maxWidth = gameWidth;
         game.scale.windowConstraints.bottom = "visual";
 
        
