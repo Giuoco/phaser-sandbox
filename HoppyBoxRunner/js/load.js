@@ -8,18 +8,54 @@
 var loadState = {
 
 
+    highScorelvl1:0,
+    highScorelvl2:0,
 
-    
-    loadScreenDone: function(){
-        game.input.onTap.add(this.loadLevel, this);
-        var x = game.add.text(400,500, 'Tap to start!', {fontSize:'24px', fill: '#ffffff', align:'center'});
-        x.anchor.set(0.5);
-            
-    },
-    
     loadLevel: function(){
         game.state.start('level1');
     },
+    
+    loadLevel2: function(){
+        game.state.start('level2');
+    },
+
+
+    
+    loadScreenDone: function(){
+        //game.input.onTap.add(this.loadLevel, this);
+        var x = game.add.text(400,500, 'Tap level play!', {fontSize:'24px', fill: '#ffffff', align:'center'});
+        x.anchor.set(0.5);
+        
+        
+       var butIcon =  game.add.button(150,120, 'butfly', this.loadLevel, this);
+       var butIcon2 =  game.add.button(150,200, 'lightbug', this.loadLevel2, this);    
+       
+                
+        var hoppyState = gameState.getState();
+        
+        if(hoppyState.lvl_01_high_score)
+        {
+            this.highScorelvl1.text = 'Level 1 High Score: ' + hoppyState.lvl_01_high_score;
+        }
+        else
+        {
+            this.highScorelvl1.text = 'Level 1 Not Complete';
+
+        }
+        
+        if(hoppyState.lvl_02_high_score)
+        {
+            this.highScorelvl2.text = 'Level 2 High Score: ' + hoppyState.lvl_02_high_score;
+            
+        }
+        else
+        {
+            this.highScorelvl2.text = 'Level 2 Not Complete';
+
+        }
+            
+    },
+    
 
 
 
@@ -66,22 +102,20 @@ var loadState = {
 
     create: function (){
         
-        //create a timer for endless adding of stones
+        //create a timer for after preload loading is finished.
+        game.time.events.add(Phaser.Timer.QUARTER, this.loadScreenDone, this);
         
+        this.highScorelvl1 = game.add.text(400, 150, 'Level 1 loading... ', {fontSize: '32px', fill:'#ffffff', align: 'center'});
+        this.highScorelvl1.anchor.set(0.5);
         
-        game.time.events.add(Phaser.Timer.SECOND*1, this.loadScreenDone, this);
-        
-        var hoppyState = gameState.getState();
-        if(hoppyState.lvl_01_high_score)
-        {
-            var highScore = game.add.text(400, 300, 'Level 1 High Score: ' + hoppyState.lvl_01_high_score, {fontSize: '32px', fill:'#ffffff', align: 'center'});
-            highScore.anchor.set(0.5);
-        }
+        this.highScorelvl2 = game.add.text(400, 225, 'Level 2 loading... ', {fontSize: '32px', fill:'#ffffff', align: 'center'});
+        this.highScorelvl2.anchor.set(0.5);
+            
 
     },
 
     update: function(){
-    
+
     },
     
     render: function(){

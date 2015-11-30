@@ -21,7 +21,7 @@ var congratzState = {
     onTapCongratz1: function(thisPlayer, doubleTap) 
     {
        
-       game.state.start('level1');
+       game.state.start('load');
     },
     
 

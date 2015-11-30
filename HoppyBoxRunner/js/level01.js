@@ -6,7 +6,7 @@
 
 var level1State = {
     
-
+    lives:3,
     platforms:0,
     background:0,
     nearground:0,
@@ -31,9 +31,11 @@ var level1State = {
 
     hurtPlayer: function() {
         this.playerhurt = game.add.sprite(this.player.x,this.player.y, 'hurthoppy');
-        
+       
+      
         this.player.destroy();
         this.player=null;
+      
         //  We need to enable physics on the player
         game.physics.arcade.enable(this.playerhurt);
         
@@ -46,6 +48,50 @@ var level1State = {
         
         this.score = 0;
         this.lvltimer = 0;
+        this.lives-=1;
+        
+        
+        if(this.lives < 1)
+        {
+            this.cleanup();
+            game.state.start('load');
+        }
+        
+        
+    },
+    
+    cleanup: function(){
+       //remove hoppy so he doesn't get hit by a stone, or confused in state change.
+            if(this.player!=null)
+            { 
+                this.player.destroy();
+                this.player = null;
+            }   
+            //done!
+            var hoppyState = gameState.getState();
+            hoppyState.lvl_01_score = this.score;
+            hoppyState.lvl_01_complete = true;
+            if(hoppyState.lvl_01_high_score)
+            {
+                if(hoppyState.lvl_01_high_score > this.highScore)
+                {
+                    hoppyState.lvl_01_high_score = this.highScore;
+                }
+            }
+            else
+            {
+                hoppyState.lvl_01_high_score = this.highScore;
+            }
+        
+            gameState.setState(hoppyState);
+
+
+            //reset the lvl for future play
+            this.score = 0;
+            this.lvltimer = 0;
+            this.lives = 3;
+            this.isCongratz = false;
+             this.lvl1music.stop();  
     },
 
     addHoppy: function()
@@ -342,34 +388,7 @@ var level1State = {
         if(!this.isCongratz && this.lvltimer > 60)
         {
              
-            //remove hoppy so he doesn't get hit by a stone, or confused in state change.
-            this.player.destroy();
-            this.player = null;
-            
-            //done!
-            var hoppyState = gameState.getState();
-            hoppyState.lvl_01_score = this.score;
-            hoppyState.lvl_01_complete = true;
-            if(hoppyState.lvl_01_high_score)
-            {
-                if(hoppyState.lvl_01_high_score > this.highScore)
-                {
-                    hoppyState.lvl_01_high_score = this.highScore;
-                }
-            }
-            else
-            {
-                hoppyState.lvl_01_high_score = this.highScore;
-            }
-        
-            gameState.setState(hoppyState);
-
-
-            //reset the lvl for future play
-            this.score = 0;
-            this.lvltimer = 0;
-            this.isCongratz = false;
-             this.lvl1music.stop();
+           this.cleanup();
             //change state
             game.state.start('congratz');
             
