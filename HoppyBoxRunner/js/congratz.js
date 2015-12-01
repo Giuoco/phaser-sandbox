@@ -21,7 +21,7 @@ var congratzState = {
     onTapCongratz1: function(thisPlayer, doubleTap) 
     {
        
-       game.state.start('level1');
+       game.state.start('load');
     },
     
 
@@ -40,10 +40,10 @@ var congratzState = {
 
         var state = gameState.getState();
 
-        var txt = "Wow! Yay! Score: "+state.lvl_01_score+"!!!";
+        var txt = "Wow! Yay!";
         var Congratz = game.add.text(400, 60, txt, { fontSize: '32px', fill: '#ffffff', align: 'center' });
         Congratz.anchor.set(0.5);
-        var Congrat2 = game.add.text(400, 100, 'Level 1 Finished!', { fontSize: '48px', fill: '#ffffff', align: 'center' });
+        var Congrat2 = game.add.text(400, 100, 'Level Finished!', { fontSize: '48px', fill: '#ffffff', align: 'center' });
         Congrat2.anchor.set(0.5);
         
 

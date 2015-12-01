@@ -6,7 +6,7 @@
 
 var level1State = {
     
-
+    lives:3,
     platforms:0,
     background:0,
     nearground:0,
@@ -25,15 +25,20 @@ var level1State = {
     jumpAudio:0,
     butflyBonus:1,
     bonus:0,
+    life1:0,
+    life2:0,
+    life3:0,
     
     
 
 
     hurtPlayer: function() {
         this.playerhurt = game.add.sprite(this.player.x,this.player.y, 'hurthoppy');
-        
+       
+      
         this.player.destroy();
         this.player=null;
+      
         //  We need to enable physics on the player
         game.physics.arcade.enable(this.playerhurt);
         
@@ -46,6 +51,59 @@ var level1State = {
         
         this.score = 0;
         this.lvltimer = 0;
+        this.lives-=1;
+        
+        this.loseLife();
+        
+        if(this.lives < 1)
+        {
+            this.cleanup();
+            game.state.start('load'); 
+        }
+        
+        
+    },
+    
+    loseLife: function(){
+      if(this.lives == 2){
+        this.heartTweenComplete(this.life3);
+      }  
+      
+      if(this.lives == 1){
+        this.heartTweenComplete(this.life2);
+      }
+    },
+    
+    heartTweenComplete: function(heartSprite){
+      heartSprite.visible = false;
+      heartSprite.alpha = 1;
+    },
+    
+    
+    cleanup: function(){
+       //remove hoppy so he doesn't get hit by a stone, or confused in state change.
+            if(this.player!=null)
+            { 
+                this.player.destroy();
+                this.player = null;
+            }   
+            //done!
+            var hoppyState = gameState.getState();
+            hoppyState.lvl_01_score = this.score;
+            hoppyState.lvl_01_complete = true;
+            hoppyState.lvl_01_high_score = this.highScore;
+            
+            gameState.setState(hoppyState);
+
+            this.life1.visible = true;
+            this.life2.visible = true;
+            this.life3.visible = true;
+            //reset the lvl for future play
+            this.score = 0;
+            this.lvltimer = 0;
+            this.lives = 3;
+            this.isCongratz = false;
+             this.lvl1music.stop();  
     },
 
     addHoppy: function()
@@ -179,7 +237,7 @@ var level1State = {
             this.butflycounter = 0;
         }
         
-         if(this.score > 3)
+         if(this.score > 0)
         {
             var tween = game.add.tween(this.instructions).to( { alpha: 0 }, 1000, "Linear", true);
             tween.onComplete.add(this.instructionsDone,this);
@@ -252,6 +310,9 @@ var level1State = {
         this.highScoreDisplay = game.add.text(16, 16, 'High Score: 0', { fontSize: '32px', fill: '#000' });
         this.scoreDisplay = game.add.text(16, 40, 'Score: 0', { fontSize: '32px', fill: '#000' });
         this.timerDisplay = game.add.text(650,16, 'Timer: ', {fontSize: '32px', fill: '#000'});
+        this.life1 = game.add.sprite(655,55,'life');
+        this.life2 = game.add.sprite(685,55,'life');
+        this.life3 = game.add.sprite(715,55,'life');
         this.instructions = game.add.text(400,300, 'Hoppy Box Runner!  Tap to jump! \nJump rocks, Collect stuff for points!!', {fontSize: '24px', fill: '#000'});
         this.instructions.anchor.set(0.5,0.5);
         
@@ -342,34 +403,7 @@ var level1State = {
         if(!this.isCongratz && this.lvltimer > 60)
         {
              
-            //remove hoppy so he doesn't get hit by a stone, or confused in state change.
-            this.player.destroy();
-            this.player = null;
-            
-            //done!
-            var hoppyState = gameState.getState();
-            hoppyState.lvl_01_score = this.score;
-            hoppyState.lvl_01_complete = true;
-            if(hoppyState.lvl_01_high_score)
-            {
-                if(hoppyState.lvl_01_high_score > this.highScore)
-                {
-                    hoppyState.lvl_01_high_score = this.highScore;
-                }
-            }
-            else
-            {
-                hoppyState.lvl_01_high_score = this.highScore;
-            }
-        
-            gameState.setState(hoppyState);
-
-
-            //reset the lvl for future play
-            this.score = 0;
-            this.lvltimer = 0;
-            this.isCongratz = false;
-             this.lvl1music.stop();
+           this.cleanup();
             //change state
             game.state.start('congratz');
             
