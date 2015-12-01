@@ -82,6 +82,7 @@ var loadState = {
         game.load.image('hoppy', 'assets/hoppy.png');
         game.load.image('hurthoppy', 'assets/hurthoppy.png');
         game.load.image('eveningGround','assets/eveningPlatform.png');
+        game.load.image('life', 'assets/life.png');
         
         game.load.image('eveningSky', 'assets/eveningSky.png');
         game.load.image('eveningTrees', 'assets/eveningTrees.png');
