@@ -23,7 +23,7 @@ var loadState = {
     
     loadScreenDone: function(){
         //game.input.onTap.add(this.loadLevel, this);
-        var x = game.add.text(400,500, 'Tap level play!', {fontSize:'24px', fill: '#ffffff', align:'center'});
+        var x = game.add.text(400,500, 'Tap Butterfly or Lightning Bug to play!', {fontSize:'24px', fill: '#ffffff', align:'center'});
         x.anchor.set(0.5);
         
         
@@ -69,11 +69,11 @@ var loadState = {
 
 /*-----------------------------------------------------------------------------*/
 
-
+    loading:0,
 
     preload: function(){
-        var loading = game.add.text(400, 60, 'Loading....', { fontSize: '32px', fill: '#ffffff', align: 'center' });
-        loading.anchor.set(0.5);
+        this.loading = game.add.text(400, 60, 'Loading....', { fontSize: '32px', fill: '#ffffff', align: 'center' });
+        this.loading.anchor.set(0.5);
          //load up resources
         game.load.image('sky', 'assets/sunnysky.png');
         game.load.image('pines', 'assets/tallpinebackground.png');
@@ -111,7 +111,8 @@ var loadState = {
         
         this.highScorelvl2 = game.add.text(400, 225, 'Level 2 loading... ', {fontSize: '32px', fill:'#ffffff', align: 'center'});
         this.highScorelvl2.anchor.set(0.5);
-            
+        
+        this.loading.visible=false;    
 
     },
 
